@@ -16,7 +16,8 @@ export enum TrendCategory {
   NEWS = 'News & Politics',
   MEMES = 'Viral & Memes',
   FINANCE = 'Finance',
-  SPORTS = 'Sports'
+  SPORTS = 'Sports',
+  CRYPTO = 'Crypto & Web3'
 }
 
 export interface GeminiResponse {

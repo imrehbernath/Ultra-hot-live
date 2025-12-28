@@ -1,30 +1,32 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { TrendTopic } from "../types";
+import { TrendTopic, TrendCategory } from "../types";
 
 export const fetchTrendingTopics = async (): Promise<TrendTopic[]> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
   
-  const prompt = `ACT AS A REAL-TIME USA VIRAL DETECTION SYSTEM. 
-    CURRENT TIMESTAMP: ${new Date().toISOString()}
+  const prompt = `ACT AS A HIGH-FREQUENCY USA TREND & CRYPTO TICKER DISCOVERY ENGINE. 
+    CURRENT ISO TIMESTAMP: ${new Date().toISOString()}
     
-    MISSION: Identify the top 30-40 most explosive trending topics in the United States occurring RIGHT NOW.
+    MISSION: Identify the top 40-50 most explosive entities peaking in the United States RIGHT NOW.
     
     CRITICAL INSTRUCTIONS:
-    1. DO NOT rely on past knowledge or static lists. Use Google Search to find what is spiking in the last 15-30 minutes.
-    2. Look for "micro-trends": even single words or numbers (like "six", "seven", or cryptic viral phrases) that are currently flooding search or social feeds.
-    3. DISREGARD previous example keywords (like BARBIE, GTA, etc.) UNLESS they are genuinely at a viral peak this exact hour.
-    4. Categories to monitor: Breaking News (US focus), Tech/Gaming leaks, Entertainment scandals/releases, Viral Memes, and high-velocity Finance/Stock moves.
+    1. DUAL-STREAM SCAN: 
+       - Stream A: General Viral Trends (News, Gaming, Entertainment, Memes, micro-words like 'six' or 'seven').
+       - Stream B: High-Velocity Crypto Tokens (Specific memecoins, tickers like $PEPE, $SOL, $DOGE, or new trending tokens spiking on DexTools/X/CoinMarketCap).
+    2. EXCLUSIVELY use Google Search Grounding to find data from the LAST 5-20 MINUTES.
+    3. PRIORITY: If a token just "mooned" or a ticker is being spammed in the last 10 minutes, put it in the list.
+    4. DATA FORMATTING: For crypto topics, use the ticker if possible (e.g., "PEPE", "SOL", "WIF") or the full name if it's a major move.
+    5. IGNORE OLD DATA: Only focus on the absolute current heat.
     
-    For each topic, provide:
-    - Topic: The exact trending phrase or entity.
-    - Category: (Entertainment, Tech & Gaming, News & Politics, Viral & Memes, Finance, Sports).
-    - Description: Exactly what is happening to cause this spike (Max 12 words).
-    - VolumeScore: 1-100 (Intensity of the spike).
-    - Sentiment: (positive, negative, neutral, viral).
+    For each trend, provide:
+    - topic: The Ticker or Name (e.g., "TRUMP", "$PEPE", "GTA6").
+    - category: Use one of: Entertainment, Tech & Gaming, News & Politics, Viral & Memes, Finance, Sports, Crypto & Web3.
+    - description: One-sentence explanation of the EXACT current spike (Max 12 words).
+    - volumeScore: 1-100 (Relative viral intensity/velocity).
+    - sentiment: (positive, negative, neutral, viral).
     
-    MANDATORY: Use Google Search Grounding. Your data must be 100% current for the US market.
-    Output only a valid JSON array.`;
+    OUTPUT: A valid JSON array of objects.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -58,7 +60,7 @@ export const fetchTrendingTopics = async (): Promise<TrendTopic[]> => {
       timestamp: new Date().toISOString()
     }));
   } catch (error) {
-    console.error("Discovery System Error:", error);
+    console.error("Signal Acquisition Error:", error);
     return [];
   }
 };
