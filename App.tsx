@@ -97,22 +97,14 @@ const App: React.FC = () => {
 
   const exportToCSV = () => {
     if (trends.length === 0) return;
-    const headers = ['Topic', 'Category', 'Location', 'HeatScore', 'Description', 'Timestamp'];
-    const rows = trends.map(t => [
-      `"${t.topic}"`,
-      `"${t.category}"`,
-      `"${t.location}"`,
-      t.volumeScore,
-      `"${t.description.replace(/"/g, '""')}"`,
-      t.timestamp
-    ]);
+    // Exporting just the TOPICS in uppercase to match the user's provided example style
+    const csvContent = trends.map(t => t.topic.toUpperCase()).join('\n');
     
-    const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `trendmolten_global_${new Date().toISOString()}.csv`);
+    link.setAttribute('download', `TRENDS_${new Date().toISOString().split('T')[0]}.csv`);
     link.click();
   };
 
@@ -155,8 +147,8 @@ const App: React.FC = () => {
 
           <div className="flex gap-2">
             {trends.length > 0 && (
-              <button onClick={exportToCSV} title="Export Data" className="p-2 border border-white/10 rounded-full hover:bg-white/5 transition-colors">
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              <button onClick={exportToCSV} title="Export CSV Keywords" className="p-2 border border-white/10 rounded-full hover:bg-white/5 transition-colors">
+                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
               </button>
             )}
             {!isActive ? (
