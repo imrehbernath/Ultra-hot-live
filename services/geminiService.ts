@@ -1,31 +1,43 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { TrendTopic, GeminiResponse } from "../types";
 
-// Service to fetch trending topics transformed into Meme Coin tickers
 export const fetchTrendingTopics = async (): Promise<GeminiResponse> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+  const apiKey = process.env.API_KEY;
   
-  const prompt = `REAL-TIME US MEME COIN TICKER GENERATOR. 
-    TIMESTAMP: ${new Date().toISOString()}
+  if (!apiKey) {
+    throw new Error("API_KEY_MISSING");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+  
+  const prompt = `ULTRA-FAST GLOBAL TREND RADAR. 
+    HUIDIGE TIJD: ${new Date().toISOString()}
     
-    TASK: Scan current USA viral news, social media peaks, and trending events. 
-    TRANSFORM these events into highly tradeable "Meme Coin" names and tickers.
+    TAAK: 
+    1. Identificeer de TOP 15 meest virale onderwerpen WERELDWIJD (niet alleen USA, focus ook op Europa, Azië en Midden-Oosten).
+    2. Schrijf een 'globalSummary' van max 2 zinnen die de huidige algehele wereldwijde sfeer samenvat.
     
-    INSTRUCTIONS:
-    1. Identify what is trending in the US RIGHT NOW (last 30-60 mins).
-    2. Convert each trend into a "Ticker" (e.g., $ELON, $HAWK, $PEPE vibe).
-    3. Be creative: if a specific person or event is viral, create a catchy ticker for it.
-    4. Use Google Search grounding to ensure these are actually trending topics.
+    BELANGRIJK: Schrijf de 'description' en de 'globalSummary' ALTIJD in het NEDERLANDS.
     
-    JSON SCHEMA FOR EACH OBJECT:
-    - topic: The Ticker name (e.g., $TICKER) - MUST START WITH $.
-    - category: Choose from: [Breaking Catalyst, Viral Meme, Political Hype, Tech Alpha, Sports Pump, Entertainment].
-    - description: Why this ticker is trending. Max 10 words. (e.g., "Trending due to X's latest post about Mars").
-    - volumeScore: 1-100 (representing social media "heat").
-    - sentiment: positive, negative, neutral, viral.
+    OUTPUT FORMAT:
+    {
+      "globalSummary": "Nederlandstalige samenvatting van de wereldwijde toestand.",
+      "trends": [
+        {
+          "topic": "Naam",
+          "category": "HOT/BREAKING/etc",
+          "description": "Nederlandse uitleg",
+          "location": "Land of Regio",
+          "volumeScore": 1-100,
+          "sentiment": "viral/positive/neutral/negative"
+        }
+      ]
+    }
     
-    IMPORTANT: Provide ONLY the JSON array. Do not include markdown blocks. Return 20-30 tickers.`;
+    INSTRUCTIES:
+    - Gebruik Google Search voor de meest actuele data van de afgelopen 30 minuten.
+    - Retourneer alleen pure JSON.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -33,33 +45,15 @@ export const fetchTrendingTopics = async (): Promise<GeminiResponse> => {
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }],
+        responseMimeType: "application/json",
       },
     });
 
-    let text = response.text || "[]";
+    const data = JSON.parse(response.text || "{}");
     
-    // Strip markdown code blocks if the model included them
-    if (text.includes("```json")) {
-      text = text.split("```json")[1].split("```")[0];
-    } else if (text.includes("```")) {
-      text = text.split("```")[1].split("```")[0];
-    }
-
-    let parsedTrends: any[] = [];
-    try {
-      parsedTrends = JSON.parse(text.trim());
-    } catch (e) {
-      const start = text.indexOf('[');
-      const end = text.lastIndexOf(']');
-      if (start !== -1 && end !== -1) {
-        parsedTrends = JSON.parse(text.substring(start, end + 1));
-      }
-    }
-    
-    const trends: TrendTopic[] = parsedTrends.map((item: any, index: number) => ({
+    const trends: TrendTopic[] = (data.trends || []).map((item: any, index: number) => ({
       ...item,
       id: `${Date.now()}-${index}`,
-      topic: item.topic?.startsWith('$') ? item.topic.toUpperCase() : `$${item.topic?.toUpperCase()}`,
       timestamp: new Date().toISOString()
     }));
 
@@ -67,12 +61,17 @@ export const fetchTrendingTopics = async (): Promise<GeminiResponse> => {
     const sources = groundingChunks
       .filter((chunk: any) => chunk.web)
       .map((chunk: any) => ({
-        title: chunk.web.title || "Context Link",
+        title: chunk.web.title || "Bron",
         uri: chunk.web.uri
       }));
 
-    return { trends, sources };
-  } catch (error) {
+    return { 
+      trends, 
+      globalSummary: data.globalSummary || "Systeem synchroniseert globale data...",
+      sources 
+    };
+  } catch (error: any) {
+    console.error("Gemini Error:", error);
     throw error;
   }
 };

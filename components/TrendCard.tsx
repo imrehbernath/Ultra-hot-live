@@ -7,66 +7,56 @@ interface TrendCardProps {
 }
 
 const getCategoryStyles = (category: string) => {
-  const normalized = category.toLowerCase();
-  if (normalized.includes('catalyst')) return 'from-purple-600/30 to-indigo-600/10 text-purple-400 border-purple-500/20';
-  if (normalized.includes('hype')) return 'from-blue-600/30 to-cyan-600/10 text-blue-400 border-blue-500/20';
-  if (normalized.includes('tech')) return 'from-cyan-600/30 to-blue-600/10 text-cyan-400 border-cyan-500/20';
-  if (normalized.includes('meme')) return 'from-pink-600/30 to-rose-600/10 text-pink-400 border-pink-500/20';
-  if (normalized.includes('sports')) return 'from-orange-600/30 to-yellow-600/10 text-orange-400 border-orange-500/20';
-  if (normalized.includes('entertainment')) return 'from-emerald-600/30 to-teal-600/10 text-emerald-400 border-emerald-500/20';
-  return 'from-gray-600/30 to-slate-600/10 text-gray-300 border-gray-500/20';
-};
-
-const getSentimentIcon = (sentiment: string) => {
-  switch (sentiment) {
-    case 'positive': return '🔥';
-    case 'negative': return '🔻';
-    case 'viral': return '🚀';
-    case 'neutral': return '💎';
-    default: return '⚡';
-  }
+  const cat = category.toUpperCase();
+  if (cat.includes('BREAKING')) return 'from-red-600 to-orange-600 text-white border-red-500 shadow-[0_0_15px_rgba(220,38,38,0.5)]';
+  if (cat.includes('HOT')) return 'from-orange-500 to-yellow-500 text-black border-orange-400';
+  if (cat.includes('VIRAL')) return 'from-pink-600 to-purple-600 text-white border-pink-500';
+  if (cat.includes('TECH')) return 'from-cyan-500 to-blue-600 text-white border-cyan-400';
+  return 'from-slate-700 to-slate-900 text-slate-300 border-slate-600';
 };
 
 export const TrendCard: React.FC<TrendCardProps> = ({ trend }) => {
-  const isExplosive = trend.volumeScore > 85;
+  const isSuperHot = trend.volumeScore > 90;
   
   return (
-    <div className={`group relative h-full bg-[#0a0c12]/60 border border-white/[0.05] rounded-[2rem] p-6 hover:bg-[#0a0c12]/90 transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_20px_40px_rgba(0,0,0,0.6)] overflow-hidden ${isExplosive ? 'ring-2 ring-amber-500/30' : ''}`}>
-      {/* Background Glow */}
-      <div className={`absolute -bottom-10 -right-10 w-40 h-40 blur-[80px] rounded-full opacity-0 group-hover:opacity-30 transition-all duration-700 bg-gradient-to-br ${getCategoryStyles(trend.category)}`}></div>
+    <div className={`group relative h-full bg-slate-900/40 border-t border-l border-white/10 rounded-3xl p-6 transition-all duration-300 hover:-translate-y-2 ${isSuperHot ? 'ring-1 ring-orange-500/50' : ''}`}>
+      <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 rounded-3xl transition-opacity duration-500 bg-gradient-to-br ${getCategoryStyles(trend.category)}`}></div>
       
-      <div className="flex flex-col h-full relative z-10">
-        <div className="flex items-start justify-between mb-4">
-          <div className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-black border uppercase tracking-wider bg-gradient-to-br ${getCategoryStyles(trend.category)}`}>
-            {trend.category}
-          </div>
-          {isExplosive && (
-            <span className="text-[8px] font-black text-black bg-amber-500 px-2 py-0.5 rounded-md animate-pulse uppercase tracking-widest shadow-[0_0_10px_#f59e0b]">
-              HIGH APY
+      <div className="relative z-10 flex flex-col h-full">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex gap-2">
+            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${getCategoryStyles(trend.category)}`}>
+              {trend.category}
             </span>
+            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border border-white/10 bg-white/5 text-slate-400">
+              {trend.location}
+            </span>
+          </div>
+          {isSuperHot && (
+            <div className="flex gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping"></span>
+            </div>
           )}
         </div>
-        
-        <h3 className="text-2xl font-[1000] leading-tight mb-2 uppercase tracking-tighter text-white group-hover:text-amber-400 transition-colors">
+
+        <h3 className={`text-2xl font-black leading-none mb-3 tracking-tighter transition-colors ${isSuperHot ? 'text-orange-400' : 'text-white'}`}>
           {trend.topic}
         </h3>
-        
-        <p className="text-slate-500 text-[11px] font-bold leading-tight mb-8 line-clamp-3 group-hover:text-slate-300 transition-colors">
+
+        <p className="text-slate-400 text-xs font-medium leading-relaxed mb-6">
           {trend.description}
         </p>
-        
-        <div className="mt-auto space-y-3">
-          <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-[0.2em] text-slate-600">
-            <span>MEME VELOCITY</span>
-            <span className={`flex items-center gap-1.5 ${isExplosive ? 'text-amber-500' : 'text-slate-400'}`}>
-              {trend.volumeScore}% {getSentimentIcon(trend.sentiment)}
-            </span>
+
+        <div className="mt-auto pt-4 border-t border-white/5">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[9px] font-black text-slate-500 tracking-widest uppercase">Heat Index</span>
+            <span className="text-xs font-black text-white">{trend.volumeScore}%</span>
           </div>
-          <div className="w-full bg-white/[0.03] h-1.5 rounded-full overflow-hidden border border-white/5">
+          <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
             <div 
-              className={`h-full rounded-full transition-all duration-[2000ms] ${isExplosive ? 'bg-gradient-to-r from-amber-600 to-yellow-300 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-slate-700'}`}
+              className={`h-full transition-all duration-1000 ${isSuperHot ? 'bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400' : 'bg-blue-500'}`}
               style={{ width: `${trend.volumeScore}%` }}
-            />
+            ></div>
           </div>
         </div>
       </div>

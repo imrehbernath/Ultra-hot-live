@@ -2,25 +2,16 @@
 export interface TrendTopic {
   id: string;
   topic: string;
-  category: TrendCategory;
+  category: string;
   description: string;
   volumeScore: number;
   sentiment: 'positive' | 'negative' | 'neutral' | 'viral';
-  sourceUrl?: string;
+  location: string;
   timestamp: string;
-}
-
-export enum TrendCategory {
-  ENTERTAINMENT = 'Entertainment',
-  TECH = 'Tech & Gaming',
-  NEWS = 'News & Politics',
-  MEMES = 'Viral & Memes',
-  FINANCE = 'Finance',
-  SPORTS = 'Sports',
-  CRYPTO = 'Crypto & Web3'
 }
 
 export interface GeminiResponse {
   trends: TrendTopic[];
+  globalSummary: string;
   sources: { title: string; uri: string }[];
 }
