@@ -15,3 +15,19 @@ export interface GeminiResponse {
   globalSummary: string;
   sources: { title: string; uri: string }[];
 }
+
+export interface ScoredToken {
+  rank: number;
+  name: string;
+  score: number;
+  reason: string;
+}
+
+export interface ScreenshotAnalysis {
+  tokens_found: number;
+  scored_tokens: ScoredToken[];
+  top_picks: string[];
+  avoid: string[];
+  trending_themes: string[];
+  market_sentiment: string;
+}
